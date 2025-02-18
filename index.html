@@ -1,363 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Software Builder</title>
-  <link rel="icon" href="https://www.cmblu.com/favicon.ico" />
-  <link
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-  />
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css?family=Orbitron&display=swap"
-  />
-  <style>
-    /* Reset some default spacing */
-    body, h1, p {
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      font-family: 'Courier New', Courier, monospace;
-      background: #1e1e1e;
-      color: #c5c6c7;
-      padding: 20px;
-      box-sizing: border-box;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      overflow-y: auto;
-    }
-
-    video.background-video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -1;
-    }
-
-    .video-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: -1;
-    }
-
-    .fallback-image {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -1;
-    }
-
-    .fallback-active {
-      display: block;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(5px);
-      padding: 10px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      animation: fadeIn 1.2s ease-out forwards;
-      color: #fff;
-    }
-
-    header img {
-      max-height: 60px;
-      margin-right: 15px;
-    }
-    
-    header h1 {
-      font-size: 1rem;
-      color: #fff;
-      text-shadow: 2px 2px 4px #000;
-    }
-    
-    #build-log {
-      background: rgba(11, 12, 16, 0.2);
-      backdrop-filter: blur(10px);
-      padding: 15px;
-      border: 1px solid #3095CC;
-      height: auto;
-      min-height: 150px;
-      overflow-y: unset;
-      margin-bottom: 20px;
-      white-space: pre-wrap;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 0.9rem;
-      line-height: 1.5;
-      border-radius: 5px;
-      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-      color: #f0f0f0;
-      animation: fadeIn 1.2s ease-out forwards;
-    }
-
-    /* Code formatting color inside the build log */
-    #build-log code {
-      color: #66fcf1;
-      font-weight: bold;
-    }
-
-    /* Optional fade-in for new lines (example) */
-    @keyframes lineFadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-    
-    /* Progress Bar */
-    #progress-container {
-      width: 100%;
-      background-color: rgba(51, 51, 51, 0.8);
-      border: 1px solid #3095CC;
-      border-radius: 5px;
-      overflow: hidden;
-      margin-bottom: 20px;
-      height: 35px;
-    }
-
-    #progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #3095CC, #3095CC);
-      transition: width 0.5s ease-out;
-      animation: progressPulse 1.5s ease-in-out infinite alternate;
-    }
-
-    @keyframes progressPulse {
-      0% { opacity: 0.7; }
-      100% { opacity: 1; }
-    }
-
-    #progress-text {
-      text-align: center;
-      margin-top: -10px;
-      font-size: 1.25rem;
-      color: #f0f0f0;
-      animation: animate__animated animate__pulse infinite;
-      font-weight: bold;
-    }
-    
-    /* Fancy Output Number */
-    #output {
-      text-align: center;
-      font-size: 4rem;
-      font-weight: bold;
-      color: transparent;
-      -webkit-text-stroke: 2px #00ff00;
-      text-shadow: 2px 2px 5px #000;
-      margin-top: 20px;
-      animation: popIn 0.5s ease-out;
-      font-family: 'Orbitron', sans-serif;
-    }
-    
-    @keyframes popIn {
-      from {
-        transform: scale(0.5);
-        opacity: 0;
-      }
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    /* Responsive design */
-    @media (max-width: 600px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        text-align: center;
-      }
-      
-      header img {
-        margin-bottom: 10px;
-      }
-      
-      /* #build-log {
-        height: 120px;
-      } */
-      
-      #output {
-        font-size: 3.5rem;
-      }
-    }
-
-    footer {
-      text-align: center;
-      padding: 10px;
-      background: rgba(11, 12, 16, 0.2);
-      backdrop-filter: blur(5px);
-      color: #f0f0f0;
-      border-top: 1px solid #3095CC;
-      margin-top: 20px;
-      border-radius: 5px;
-      animation: fadeIn 1.2s ease-out forwards;
-      margin-top: auto;
-    }
-  </style>
-</head>
-<body>
-  <video id="bgVideo" class="background-video" autoplay loop muted playsinline>
-    <source src="https://cmblu.cdn.prismic.io/cmblu/9630661c-0b01-4347-8335-3e96411f5138_cmblu-company-video-loop-intro.mp4" type="video/mp4">
-  </video>
-  <img class="fallback-image" src="https://www.cmblu.com/fileadmin/_processed_/csm_2021-07-21_CMBlu_Logo_Claim_4c_300dpi_0e2e1b1e3d.png" alt="Fallback Image">
-  <div class="video-overlay"></div>
-  <header>
-    <img
-      src="https://cmblu.cdn.prismic.io/cmblu/09d34d2e-ca30-4733-9378-90401d4c05d9_cmblu_logo_Normal+%281%29.svg"
-      alt="Company Logo"
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Software Builder</title>
+    <link rel="icon" href="https://www.cmblu.com/favicon.ico" />
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
     />
-    <h1>Software Builder</h1>
-  </header>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Orbitron&display=swap"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <video
+      id="bgVideo"
+      class="background-video"
+      autoplay
+      loop
+      muted
+      playsinline
+    >
+      <source
+        src="https://cmblu.cdn.prismic.io/cmblu/9630661c-0b01-4347-8335-3e96411f5138_cmblu-company-video-loop-intro.mp4"
+        type="video/mp4"
+      />
+    </video>
+    <img
+      class="fallback-image"
+      src="https://www.cmblu.com/fileadmin/_processed_/csm_2021-07-21_CMBlu_Logo_Claim_4c_300dpi_0e2e1b1e3d.png"
+      alt="Fallback Image"
+    />
+    <div class="video-overlay"></div>
+    <header>
+      <img
+        src="https://cmblu.cdn.prismic.io/cmblu/09d34d2e-ca30-4733-9378-90401d4c05d9_cmblu_logo_Normal+%281%29.svg"
+        alt="Company Logo"
+      />
+      <h1>Software Builder</h1>
+    </header>
 
-  <div id="build-log"></div>
-  
-  <!-- Progress Bar -->
-  <div id="progress-container">
-    <div id="progress-bar"></div>
-  </div>
-  <div id="progress-text">0%</div>
-  
-  <!-- Final Output -->
-  <div id="output"></div>
+    <div id="build-log"></div>
 
-  <footer>
-    &copy; 2023 <a href="https://www.cmblu.com" style="color: #3095CC;">CMBlu Energy AG</a>
-  </footer>
+    <!-- Replace Progress Bar HTML -->
+    <div id="progress-container">
+      <div class="battery-container">
+        <div class="battery-cells">
+          <!-- Cells will be added via JavaScript -->
+        </div>
+        <div class="battery-percentage">0%</div>
+        <div class="battery-tip"></div>
+      </div>
+    </div>
 
-  <script>
-    // Utility to append text to the build log
-    function appendLog(message) {
-      const logElement = document.getElementById("build-log");
-      logElement.innerHTML += `<code>${message}</code><br/>`;
-      logElement.scrollTop = logElement.scrollHeight;
-    }
+    <!-- Final Output -->
+    <div id="output"></div>
 
-    // Update progress bar and text
-    function updateProgress(percentage) {
-      const progressBar = document.getElementById("progress-bar");
-      const progressText = document.getElementById("progress-text");
-      progressBar.style.width = percentage + "%";
-      progressText.textContent = percentage + "%";
-    }
+    <footer>
+      &copy; 2025
+      <a href="https://www.cmblu.com" style="color: #3095cc">CMBlu Energy AG</a>
+    </footer>
 
-    // Device detection: returns 9 for Android, 10 for any other device
-    function detectDevice() {
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      if (/android/i.test(userAgent)) {
-        return 9;
-      } else {
-        return 10;
-      }
-    }
-
-    function getTimeStamp() {
-      const now = new Date();
-      return '[' + now.toLocaleTimeString() + ']';
-    }
-
-    let startTime;
-
-    // Simulate build steps with progress updates
-    function runBuildSequence() {
-      startTime = Date.now();
-      const steps = [
-        "Initializing components...",
-        "Reading configuration files...",
-        "Loading modules: Webpack, Babel, ESLint...",
-        "Installing dependencies: React, Redux, Lodash...",
-        "Compiling source code...",
-        "Linting source files...",
-        "Minifying assets...",
-        "Bundling project...",
-        "Running tests...",
-        "Finalizing build artifacts..."
-      ];
-      
-      let delay = 0;
-      const totalSteps = steps.length;
-      
-      steps.forEach((step, index) => {
-        // Generate a random delay between 1s (1000ms) and 3s (3000ms)
-        const randomDelay = Math.floor(Math.random() * 2000) + 1000;
-        setTimeout(() => {
-          appendLog(getTimeStamp() + " " + step);
-          // Calculate progress percentage (rounded)
-          const progress = Math.round(((index + 1) / totalSteps) * 100);
-          updateProgress(progress);
-        }, delay);
-        delay += randomDelay;
-      });
-      
-      // After build steps, detect device and print output number
-      setTimeout(() => {
-        const outputNumber = detectDevice();
-        appendLog("Build complete!");
-        appendLog("Output number: " + outputNumber);
-        const buildTime = ((Date.now() - startTime) / 1000).toFixed(2);
-        appendLog("Build time: " + buildTime + "s");
-        // Show the output number with animation
-        document.getElementById("output").innerHTML = `<span style="color: #00ff00;">Result: </span>${outputNumber}`;
-      }, delay);
-    }
-
-    // Simplified background video handling
-    function setupBackgroundVideo() {
-      const video = document.getElementById('bgVideo');
-      const fallbackImage = document.querySelector('.fallback-image');
-      
-      // Show fallback image if video fails to play
-      video.addEventListener('error', () => {
-        video.style.display = 'none';
-        fallbackImage.classList.add('fallback-active');
-      });
-    }
-
-    // Start the build sequence when the page loads
-    window.onload = function() {
-      runBuildSequence();
-      setupBackgroundVideo();
-    };
-  </script>
-</body>
+    <script src="js/app.js"></script>
+  </body>
 </html>
